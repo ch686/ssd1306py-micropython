@@ -25,6 +25,7 @@ SET_CHARGE_PUMP     = const(0x8d)
 
 class SSD1306:
     def __init__(self, width, height, external_vcc):
+        self._fonts = dict()
         self.width = width
         self.height = height
         self.external_vcc = external_vcc
@@ -99,6 +100,31 @@ class SSD1306:
     def text(self, string, x, y, col=1):
         self.framebuf.text(string, x, y, col)
 
+    def set_myfont(self,font, font_size):
+		"""设置字库"""	
+		if font_size not in [16,24,32]:
+			return
+		self._fonts[font_size] = font
+		
+	def draw_text(self,string, x_axis, y_axis, font_size=8):
+		if font_size == 8:
+			self.text(string, x_axis,y_axis)
+			return
+		if font_size not in self._fonts:
+			return
+		offset = 0		
+		for k in string:			
+			data_code = k.encode("utf-8")	
+			code = int.from_bytes(data_code, 'big', False)
+			byte_data = self._fonts[font_size][code]				
+			if len(data_code)==3: #中文				
+				fb= framebuf.FrameBuffer(bytearray(byte_data), font_size, font_size, framebuf.MONO_VLSB)				
+				self.blit(fb,x_axis + offset,y_axis)
+				offset += font_size				
+			else:				#英文符号
+				fb= framebuf.FrameBuffer(bytearray(byte_data), font_size//2, font_size, framebuf.MONO_VLSB)					
+				self.blit(fb,x_axis + offset,y_axis)				
+				offset += font_size//2	    
 
 class SSD1306_I2C(SSD1306):
     def __init__(self, width, height, i2c, addr=0x3c, external_vcc=False):
@@ -127,7 +153,8 @@ class SSD1306_I2C(SSD1306):
 
     def poweron(self):
         pass
-
+    
+    						
 
 class SSD1306_SPI(SSD1306):
     def __init__(self, width, height, spi, dc, res, cs, external_vcc=False):

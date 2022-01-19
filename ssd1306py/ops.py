@@ -7,10 +7,9 @@ Authors: jdh99 <jdh821@163.com>
 import machine
 
 import ssd1306py.ssd1306 as ssd1306
-import ssd1306py.ascii16 as ascii16
-import ssd1306py.ascii32 as ascii32
-import ssd1306py.ascii24 as ascii24
-import ssd1306py.cn as cn
+import ssd1306py.myfont16 as myfont16
+import ssd1306py.myfont32 as myfont32
+import ssd1306py.myfont24 as myfont24
 
 _oled = None
 _i2c = None
@@ -53,40 +52,18 @@ def pixel(x, y):
 
 
 def text(string, x_axis, y_axis, font_size):
-    """显示字符串.注意字符串必须是英文或者数字"""
+    """显示字符串中文英文可以混用"""
     global _oled
     if font_size != 8 and font_size != 16 and font_size != 24 and font_size != 32:
         return
-
-    if font_size == 8:
-        _oled.text(string, x_axis, y_axis)
-        return
-
-    if font_size == 16:
-        ascii16.display(_oled, string, x_axis, y_axis)
-    if font_size == 24:
-        ascii24.display(_oled, string, x_axis, y_axis)
-    if font_size == 32:
-        ascii32.display(_oled, string, x_axis, y_axis)
+     _oled.draw_text(string, x_axis, y_axis)    
 
 
-def set_font(font, font_size):
+def set_font():
     """
-    设置中文字库.允许设置多个不同大小的字库
-    字库必须是字典,格式示例:
-    font = {
-    0xe4bda0:
-        [0x08, 0x08, 0x08, 0x11, 0x11, 0x32, 0x34, 0x50, 0x91, 0x11, 0x12, 0x12, 0x14, 0x10, 0x10, 0x10, 0x80, 0x80,
-         0x80, 0xFE, 0x02, 0x04, 0x20, 0x20, 0x28, 0x24, 0x24, 0x22, 0x22, 0x20, 0xA0, 0x40],  # 你
-    0xe5a5bd:
-        [0x10, 0x10, 0x10, 0x10, 0xFC, 0x24, 0x24, 0x25, 0x24, 0x48, 0x28, 0x10, 0x28, 0x44, 0x84, 0x00, 0x00, 0xFC,
-         0x04, 0x08, 0x10, 0x20, 0x20, 0xFE, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0xA0, 0x40]  # 好
-    }
+    设置字库.允许设置多个不同大小的字库
+    直接引用myfont16，myfont32，myfont24里面的字典   
     """
-    cn.set_font(font, font_size)
-
-
-def text_cn(string, x_axis, y_axis, font_size):
-    """显示中文字符.注意字符必须是utf-8编码"""
-    global _oled
-    cn.display(_oled, string, x_axis, y_axis, font_size)
+    _oled.set_font(myfont16.font16, 16)
+    _oled.set_font(myfont24.font24, 24)
+    _oled.set_font(myfont32.font32, 32)

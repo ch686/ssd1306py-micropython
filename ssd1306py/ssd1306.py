@@ -170,35 +170,3 @@ class SSD1306_I2C(SSD1306):
 		except:
 			return
 			
-class SSD1306_pybI2C(SSD1306):
-	def __init__(self,i2c, width, height, external_vcc=False):
-		self.i2c =i2c
-		self.addr = SSD1306_I2C_ADDR		
-		self.temp = bytearray(2)
-		self.write_list = [b"\x40", None]  # Co=0, D/C#=1
-		if self.is_connect()==1:
-			super().__init__(width, height, external_vcc)
-	
-	def	is_connect(self):		
-		addresses=self.i2c.scan()		
-		bfind=0
-		for addr in addresses:
-			if addr==SSD1306_I2C_ADDR:
-				bfind=1				
-				break
-		return bfind
-		
-	def write_cmd(self, cmd):
-		self.temp[0] = 0x80  # Co=1, D/C#=0
-		self.temp[1] = cmd
-		try:
-			self.i2c.send(self.temp,self.addr)
-		except:
-			return
-			
-	def write_data(self, buf):
-		self.write_list[1] = buf
-		try:
-			self.i2c.send(self.write_list,self.addr)
-		except:
-			return			
